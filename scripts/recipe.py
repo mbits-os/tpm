@@ -199,7 +199,6 @@ class RecipeBuilder:
 
 		if is_apple():
 			self.dir = 'darwin'
-			self.vars['cmake'] = '/Applications/CMake.app/Contents/bin/cmake'
 			self.macros['APPLE'] = 1
 
 		self.props['dir'] = self.dir

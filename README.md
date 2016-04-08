@@ -7,6 +7,18 @@ The goal of this project is to provide an automated enviroment for building proj
 
 TPM consists of three components: builder - one for every platform; server - static HTTP server allowing to get the packages; and client - set of scripts downloading and installing required packages.
 
+## Prerequisites
+
+The download of various files is done through `wget` Python module. Install it for your Python to pickup
+
+    sudo pip install wget
+
+### Mac OS X
+
+For Mac OS you'll need MacPorts with python, pip and most probably cmake:
+
+    sudo port install python27 pip27 cmake
+
 ## Builder
 
 One python script is used to build a package from a recipe on any supported platform.

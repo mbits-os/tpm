@@ -64,3 +64,4 @@ target/
 # project ignores
 stage
 packages
+*.DS_Store
