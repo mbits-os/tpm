@@ -389,6 +389,53 @@ RecipeBuilder.calls = {
 
 RecipeBuilder.props = ['Name', 'Version', 'Upstream']
 
+class ManifestBuilder:
+	def __init__(self):
+		self.props = {}
+		self.requires = []
+		self.provides = []
+		self.pos = 1
+
+	def mkerror(self, message, embed = None, pos = -1):
+		if pos < 1: pos = self.pos
+		return SyntaxError(self.path, pos, message, embed)
+
+	def throw(self, message, embed = None):
+		raise self.mkerror(message, embed)
+
+	def use(self, tok):
+		self.pos = tok.pos
+
+		if isinstance(tok, Call):
+			if tok.name in ManifestBuilder.calls:
+				ManifestBuilder.calls[tok.name](self, tok.value)
+			elif tok.name in ManifestBuilder.props:
+				self.props[tok.name.lower()] = tok.value
+			else:
+				self.throw('Unknown instruction: {0}'.format(tok.name))
+
+		else:
+			self.throw('Expecting instruction')
+
+	def on_requires(self, name): self.requires.append(name)
+	def on_provides(self, name): self.provides.append(name)
+
+	def build(self):
+		if 'id' not in self.props: self.throw('Id missing')
+		if 'name' not in self.props: self.throw('Name missing')
+		if 'version' not in self.props: self.throw('Version missing')
+		if 'platform' not in self.props: self.throw('Plaform missing')
+		self.props['requires'] = self.requires
+		self.props['provides'] = self.provides
+		return self.props
+
+ManifestBuilder.calls = {
+	'Requires': ManifestBuilder.on_requires,
+	'Provides': ManifestBuilder.on_provides,
+}
+
+ManifestBuilder.props = ['Id', 'Name', 'Version', 'Platform']
+
 def parse_recipe(path):
 	tokens = Tokenizer()
 	builder = RecipeBuilder(path)
@@ -396,4 +443,12 @@ def parse_recipe(path):
 		for line in f:
 			for tok in tokens.next_line(line):
 				builder.use(tok)
+	return builder.build()
+
+def parse_manifset(contents):
+	tokens = Tokenizer()
+	builder = ManifestBuilder()
+	for line in contents.split('\n'):
+		for tok in tokens.next_line(line):
+			builder.use(tok)
 	return builder.build()

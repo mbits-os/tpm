@@ -20,6 +20,11 @@ class Tar(Archive):
 			info.type = tarfile.REGTYPE
 			io.seek(0)
 			self.impl.addfile(info, io)
+	def read(self, arcname):
+		io = self.impl.extractfile(arcname)
+		if io is None: return None
+		try: return io.read()
+		finally: io.close()
 
 class Zip(Archive):
 	def __init__(self, path, mode = 'r'):
@@ -27,6 +32,9 @@ class Zip(Archive):
 		self.impl = zipfile.ZipFile(path, mode)
 	def add(self, path, arcname): self.impl.write(path, arcname)
 	def write(self, content, arcname): self.impl.writestr(arcname, content)
+	def read(self, arcname):
+		try: return self.impl.read(arcname)
+		except: return None
 
 known_exts = [
 	(["tar.gz", "tgz"], "w:gz"),
